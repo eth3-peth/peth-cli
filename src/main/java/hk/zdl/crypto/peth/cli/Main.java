@@ -56,7 +56,7 @@ public class Main {
 			} else if (jobj_arg.has("private_ket_base64")) {
 				private_key = Base64.decode(jobj_arg.getString("private_ket_base64"));
 			} else if (jobj_arg.has("private_ket_hex")) {
-				private_key = Hex.decode(jobj_arg.getString("private_ket_base64"));
+				private_key = Hex.decode(jobj_arg.getString("private_ket_hex"));
 			}
 			var public_key = SignumCrypto.getInstance().getPublicKey(private_key);
 
