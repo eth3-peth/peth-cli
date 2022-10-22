@@ -65,6 +65,29 @@ public class Main {
 			byte[] signedTransactionBytes = SignumCrypto.getInstance().signTransaction(private_key, unsignedTransaction);
 			TransactionBroadcast x = ns.broadcastTransaction(signedTransactionBytes).blockingGet();
 			System.out.println("txid:" + x.getTransactionId().getID());
+
+		} else if (action.equals("get_address")) {
+			var memo = jobj_arg.optString("memo", null);
+			var private_key_str = jobj_arg.optString("private_key", null);
+			var public_key_str = jobj_arg.optString("public_key", null);
+
+			var private_key = new byte[] {};
+			var public_key = new byte[] {};
+			
+			
+			if(memo!=null) {
+				private_key = SignumCrypto.getInstance().getPrivateKey(memo);
+			}else if(private_key_str != null) {
+				private_key = Hex.decode(private_key_str);
+			}
+			if(public_key_str!=null) {
+				public_key = Hex.decode(public_key_str);
+			}else {
+				public_key = SignumCrypto.getInstance().getPublicKey(private_key);
+			}
+			var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();
+			
+			System.out.println("T"+address);
 		}
 	}
 
