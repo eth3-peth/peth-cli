@@ -85,9 +85,13 @@ public class Main {
 			}else {
 				public_key = SignumCrypto.getInstance().getPublicKey(private_key);
 			}
-			var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();
-			
-			System.out.println("T"+address);
+			if(jobj_arg.optBoolean("show_id")) {
+				var id =  SignumCrypto.getInstance().getAddressFromPublic(public_key).getID();
+				System.out.println(id);
+			}else {
+				var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();				
+				System.out.println("T"+address);
+			}
 		}
 	}
 
