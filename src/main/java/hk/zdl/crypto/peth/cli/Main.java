@@ -24,7 +24,7 @@ public class Main {
 	}
 
 	public static final int peth_decimals = 4;
-	private static final String default_url = "http://peth.world:6876";
+	private static final String default_url = "http://mainnet.peth.world:6876";
 
 	public static void main(String[] args) throws Throwable {
 		var jobj_arg = new JSONObject(new JSONTokener(System.in));
