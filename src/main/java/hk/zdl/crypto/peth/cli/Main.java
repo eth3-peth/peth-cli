@@ -49,19 +49,25 @@ public class Main {
 			var recipient = jobj_arg.getString("recipient");
 			var amount = jobj_arg.getBigDecimal("amount");
 			var fee = jobj_arg.getBigDecimal("fee");
+			var msg = jobj_arg.optString("msg");
 
 			var private_key = new byte[0];
 			if (jobj_arg.has("memo")) {
 				private_key = SignumCrypto.getInstance().getPrivateKey(jobj_arg.getString("memo"));
-			} else if (jobj_arg.has("private_ket_base64")) {
-				private_key = Base64.decode(jobj_arg.getString("private_ket_base64"));
-			} else if (jobj_arg.has("private_ket_hex")) {
-				private_key = Hex.decode(jobj_arg.getString("private_ket_hex"));
+			} else if (jobj_arg.has("private_key_base64")) {
+				private_key = Base64.decode(jobj_arg.getString("private_key_base64"));
+			} else if (jobj_arg.has("private_key_hex")) {
+				private_key = Hex.decode(jobj_arg.getString("private_key_hex"));
 			}
 			var public_key = SignumCrypto.getInstance().getPublicKey(private_key);
 
 			NodeService ns = NodeService.getInstance(url);
-			byte[] unsignedTransaction = ns.generateTransaction(SignumAddress.fromRs(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, null).blockingGet();
+			byte[] unsignedTransaction;
+			if (msg.isBlank()) {
+				unsignedTransaction = ns.generateTransaction(SignumAddress.fromRs(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, null).blockingGet();
+			} else {
+				unsignedTransaction = ns.generateTransactionWithMessage(SignumAddress.fromRs(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, msg, null).blockingGet();
+			}
 			byte[] signedTransactionBytes = SignumCrypto.getInstance().signTransaction(private_key, unsignedTransaction);
 			TransactionBroadcast x = ns.broadcastTransaction(signedTransactionBytes).blockingGet();
 			System.out.println("txid:" + x.getTransactionId().getID());
@@ -73,24 +79,23 @@ public class Main {
 
 			var private_key = new byte[] {};
 			var public_key = new byte[] {};
-			
-			
-			if(memo!=null) {
+
+			if (memo != null) {
 				private_key = SignumCrypto.getInstance().getPrivateKey(memo);
-			}else if(private_key_str != null) {
+			} else if (private_key_str != null) {
 				private_key = Hex.decode(private_key_str);
 			}
-			if(public_key_str!=null) {
+			if (public_key_str != null) {
 				public_key = Hex.decode(public_key_str);
-			}else {
+			} else {
 				public_key = SignumCrypto.getInstance().getPublicKey(private_key);
 			}
-			if(jobj_arg.optBoolean("show_id")) {
-				var id =  SignumCrypto.getInstance().getAddressFromPublic(public_key).getID();
+			if (jobj_arg.optBoolean("show_id")) {
+				var id = SignumCrypto.getInstance().getAddressFromPublic(public_key).getID();
 				System.out.println(id);
-			}else {
-				var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();				
-				System.out.println("T"+address);
+			} else {
+				var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();
+				System.out.println("T" + address);
 			}
 		}
 	}
