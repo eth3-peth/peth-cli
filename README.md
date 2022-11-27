@@ -7,7 +7,7 @@
 
 ## 示例：
 
-###生成地址：
+### 生成地址：
 
 `{"action":"get_address","memo":"some words here","public_key":"FFFFFFFF","private_key":"FFFFFFFF"}`
 
@@ -17,13 +17,13 @@
 
 * 其中，加上  show_id:true  参数，则返回数字格式的钱包ID，而非字母格式的钱包地址。
 
-###查看余额：
+### 查看余额：
 
 `{"action":"balance","address":"TS-Z9JQ-9B3P-T6CU-9LFA4"}`
 
 返回值：当前钱包余额，带四位小数
 
-###转账：
+### 转账：
 `{"action":"send","recipient":"TS-Z9JQ-9B3P-T6CU-9LFA4","amount":"1.0","fee":"1.0","memo":"some words here"}`
 
 返回值：交易ID，格式：txid:1234567890
@@ -32,7 +32,7 @@
 
 转账时可以加上msg参数发送带有明文文本消息的交易
 
-###查看已到账的转账记录
+### 查看已到账的转账记录
 `{"url":"http://testnet.peth.world:6876/","action":"get_tx","address":"TS-DQP5-DVXJ-AJSX-EMV7Q","msg":"54321",confs:0}`
 
 * 其中，url为节点服务器地址（可选项），address为所查看的钱包地址或数字ID；若msg非空，则仅紧查看留言消息为msg的转账记录；若confs参数非空且大于零，则仅查看确认数目大于confs的交易记录。
