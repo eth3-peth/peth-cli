@@ -4,8 +4,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -64,9 +69,9 @@ public class Main {
 			NodeService ns = NodeService.getInstance(url);
 			byte[] unsignedTransaction;
 			if (msg.isBlank()) {
-				unsignedTransaction = ns.generateTransaction(SignumAddress.fromRs(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, null).blockingGet();
+				unsignedTransaction = ns.generateTransaction(SignumAddress.fromEither(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, null).blockingGet();
 			} else {
-				unsignedTransaction = ns.generateTransactionWithMessage(SignumAddress.fromRs(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, msg, null).blockingGet();
+				unsignedTransaction = ns.generateTransactionWithMessage(SignumAddress.fromEither(recipient), public_key, toSignumValue(amount), toSignumValue(fee), 1440, msg, null).blockingGet();
 			}
 			byte[] signedTransactionBytes = SignumCrypto.getInstance().signTransaction(private_key, unsignedTransaction);
 			TransactionBroadcast x = ns.broadcastTransaction(signedTransactionBytes).blockingGet();
@@ -96,6 +101,40 @@ public class Main {
 			} else {
 				var address = SignumCrypto.getInstance().getAddressFromPublic(public_key).getFullAddress();
 				System.out.println("T" + address);
+			}
+		} else if (action.equals("get_tx")) {
+			var account = SignumAddress.fromEither(jobj_arg.getString("address")).getID();
+			var confs = jobj_arg.optInt("confs", 0);
+			var msg = jobj_arg.optString("msg",null);
+
+			var get = new HttpGet(url + "/burst?requestType=getAccountTransactions&type=0&subtype=0&account=" + account + "&numberOfConfirmations=" + confs);
+			var response = HttpClientBuilder.create().build().execute(get);
+			StatusLine statusLine = response.getStatusLine();
+			int statusCode = statusLine.getStatusCode();
+			var content = EntityUtils.toString(response.getEntity());
+			if (statusCode != 200) {
+				System.exit(-1);
+			} else {
+				var jobj = new JSONObject(new JSONTokener(content));
+				if (jobj.optInt("errorCode", 0) != 0) {
+					System.out.println(content);
+					System.exit(-1);
+				} else {
+					var txs = jobj.getJSONArray("transactions");
+					var jarr = new JSONArray();
+					for (int i = 0; i < txs.length(); i++) {
+						jobj = txs.getJSONObject(i);
+						if (msg == null) {
+							jarr.put(jobj);
+						} else if (jobj.has("attachment")) {
+							var o = jobj.getJSONObject("attachment");
+							if (o.getBoolean("messageIsText") && o.optString("message", "").equals(msg)) {
+								jarr.put(jobj);
+							}
+						}
+					}
+					System.out.println(jarr);
+				}
 			}
 		}
 	}
