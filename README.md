@@ -20,6 +20,7 @@
 ### 获取钱包ID/地址
 
 `{"action":"get_account","address":"TS-8AJJ-9TMN-M7J5-AJ8S6"}`
+
 返回值：钱包地址、数字ID，各一行
 
 * 其中，address可以为TS-开头的钱包地址或数字ID，均可。
