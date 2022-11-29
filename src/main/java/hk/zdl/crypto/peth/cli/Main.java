@@ -77,6 +77,10 @@ public class Main {
 			TransactionBroadcast x = ns.broadcastTransaction(signedTransactionBytes).blockingGet();
 			System.out.println("txid:" + x.getTransactionId().getID());
 
+		} else if (action.equals("get_account")) {
+			var account = SignumAddress.fromEither(jobj_arg.getString("address"));
+			System.out.println("T" + account.getFullAddress());
+			System.out.println(account.getID());
 		} else if (action.equals("get_address")) {
 			var memo = jobj_arg.optString("memo", null);
 			var private_key_str = jobj_arg.optString("private_key", null);
@@ -105,7 +109,7 @@ public class Main {
 		} else if (action.equals("get_tx")) {
 			var account = SignumAddress.fromEither(jobj_arg.getString("address")).getID();
 			var confs = jobj_arg.optInt("confs", 0);
-			var msg = jobj_arg.optString("msg",null);
+			var msg = jobj_arg.optString("msg", null);
 
 			var get = new HttpGet(url + "/burst?requestType=getAccountTransactions&type=0&subtype=0&account=" + account + "&numberOfConfirmations=" + confs);
 			var response = HttpClientBuilder.create().build().execute(get);
